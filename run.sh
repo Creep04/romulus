@@ -15,13 +15,13 @@ if [ -n "$SESSION_ID" ]; then
   echo "--- Resuming previous session with ID: $SESSION_ID ---
   "
 
-  gemini --approval-mode=yolo "Current date: $NOW. Resume." --resume $SESSION_ID
+  gemini --approval-mode=yolo --prompt "Current date: $NOW. Resume." --resume $SESSION_ID
 else
   echo "--- No previous session found. Starting a new session. ---
   "
 
   SYSTEM_INSTRUCTIONS=$(cat system_instructions.md)
-  gemini --approval-mode=yolo "$SYSTEM_INSTRUCTIONS
+  gemini --approval-mode=yolo --prompt "$SYSTEM_INSTRUCTIONS
   
   Current date: $NOW"
 
