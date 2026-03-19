@@ -70,13 +70,11 @@ function nearestEnergy(creep) {
         if (t) return { t, act: 'withdraw' };
     }
 
-    // 4. Active source
+    // 4. Active source — go to closest to minimize travel time
     const sources = creep.room.find(FIND_SOURCES_ACTIVE);
     if (sources.length) {
-        // Stable distribution using name hash
-        const hash = creep.name.length + creep.name.charCodeAt(creep.name.length - 1);
-        const t = sources[hash % sources.length];
-        return { t, act: 'harvest' };
+        const t = creep.pos.findClosestByPath(sources);
+        if (t) return { t, act: 'harvest' };
     }
     return null;
 }
