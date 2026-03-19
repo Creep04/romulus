@@ -8,13 +8,11 @@ function run(creep) {
     toggleWork(creep);
     if (!creep.memory.working) { doCollect(creep); return; }
 
-    // 1. Urgent repairs
+    // 1. Urgent repairs (exclude walls/ramparts — they start at 1 hit and would block building)
     const urgent = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-        filter: s => (s.hits < s.hitsMax * 0.5 &&
+        filter: s => s.hits < s.hitsMax * 0.5 &&
                      s.structureType !== STRUCTURE_WALL &&
-                     s.structureType !== STRUCTURE_RAMPART) ||
-                     ((s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART) &&
-                      s.hits < 10000)
+                     s.structureType !== STRUCTURE_RAMPART
     });
     if (urgent) {
         if (creep.repair(urgent) === ERR_NOT_IN_RANGE)
@@ -25,14 +23,12 @@ function run(creep) {
     // 2. Build critical infrastructure
     let site = findPrioritySite(creep, [STRUCTURE_STORAGE, STRUCTURE_EXTENSION, STRUCTURE_TOWER, STRUCTURE_CONTAINER, STRUCTURE_RAMPART]);
 
-    // 3. Normal repairs
+    // 3. Normal repairs (skip walls/ramparts — tower handles those)
     if (!site) {
         const damaged = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-            filter: s => (s.hits < s.hitsMax * 0.75 &&
+            filter: s => s.hits < s.hitsMax * 0.75 &&
                          s.structureType !== STRUCTURE_WALL &&
-                         s.structureType !== STRUCTURE_RAMPART) ||
-                         ((s.structureType === STRUCTURE_WALL || s.structureType === STRUCTURE_RAMPART) &&
-                          s.hits < 50000)
+                         s.structureType !== STRUCTURE_RAMPART
         });
         if (damaged) {
             if (creep.repair(damaged) === ERR_NOT_IN_RANGE)
