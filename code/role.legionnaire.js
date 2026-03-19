@@ -19,6 +19,7 @@ function run(creep) {
         return;
     }
 
+
     // 1. Fill spawn / extensions (Critical for spawning)
     let fill = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
         filter: s => (s.structureType === STRUCTURE_SPAWN ||
