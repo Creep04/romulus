@@ -1,12 +1,4 @@
 {
-  "mcpServers": {
-    "screeps": {
-      "command": "screeps-mcp-server",
-      "env": {
-        "SCREEPS_TOKEN": "$SCREEPS_TOKEN"
-      }
-    }
-  },
   "hooks": {
     "SessionStart": [
       {

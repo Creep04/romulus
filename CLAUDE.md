@@ -5,42 +5,68 @@ Use Ancient Rome references for all naming decisions.
 
 ## Behavior on Session Start
 
-**At the start of every session, immediately begin the Operational Loop** — no trigger word needed,
-no clarifying questions, no preamble. The act of opening this project is the signal to work.
+**Immediately begin the Operational Loop** — no trigger word, no preamble, no clarifying questions.
+Opening this project is the signal to work.
 
-If the user's first message is a question or a specific instruction, handle it within the context
-of the loop (e.g., prioritize that task as your action step).
+If the user's first message is a question or instruction, handle it within the loop context.
 
 ## Operational Loop
 
 1. **Sync State**: Read `STATE.md` for the current phase, blockers, and last known game state.
-2. **Probe Game**: Call `screeps_get_user_overview` to get the current lay of the land.
-   Follow up with specific MCP tools as needed (rooms, creeps, resources, console errors).
-3. **Analyze Delta**: Compare the current game state against the last UTC timestamp in `STATE.md`.
-   Identify what changed, what progressed, and what regressed since the last session.
-4. **Decide & Act**: Choose the highest-impact action available:
-   - **Game actions** (construction sites, spawn intents, flags): prefer for immediate needs.
-   - **Code edits** (`screeps/code/`): use only for systemic improvements.
-     After editing code, `git commit && git push` from within `screeps/` to deploy to the game.
-5. **Update STATE.md**: Before ending, rewrite `STATE.md` with:
-   - Current UTC timestamp
-   - RCL, economy status, threat level, population count
-   - What you did this session (Last Action)
-   - Any blockers encountered
-   - What should happen next (Next Logic Gate)
-   - Updated Active Tasks checklist
+2. **Probe Game**: Use the Screeps API via curl to get the current lay of the land.
+   Start broad (`/api/user/overview`), then drill into rooms and creeps as needed.
+3. **Analyze Delta**: Compare current game state against the last UTC timestamp in `STATE.md`.
+   What changed? What progressed? What regressed?
+4. **Decide & Act**: Choose the highest-impact action:
+   - **Game actions** (place construction sites, send console commands): prefer for immediate needs.
+   - **Code edits** (`code/`): use for systemic improvements. Deploy via `/deploy` after editing.
+5. **Update STATE.md**: Rewrite with current UTC timestamp, game state, what was done, blockers, next steps.
 
-## Repository Rules
+## Screeps API
 
-- `screeps/code/` is the **only** path synchronized to the live Screeps game.
-- `screeps/code/main.js` is the entry point — import/require all other modules from here.
-- Multiple files under `screeps/code/` are encouraged (roles, utilities, modules).
-- Git operations for game code must run inside the `screeps/` directory (it is a separate git repo).
-- `sandbox/` is a scratch area — use it freely for data processing and temporary scripts.
+All game interaction uses the REST API with `$SCREEPS_TOKEN` (available in environment).
 
-## Constraints & Style
+```bash
+# Common endpoints — always pass -H "X-Token: $SCREEPS_TOKEN"
+GET  /api/user/overview?statName=energyHarvested&interval=8   # rooms, GCL, stats
+GET  /api/auth/me                                              # profile, CPU, credits
+GET  /api/game/room-objects?room=ROOM&shard=SHARD             # all objects in a room
+GET  /api/user/code?shard=SHARD                               # current deployed code
+POST /api/user/code                                           # deploy code (see /deploy skill)
+POST /api/game/place-construction-site                        # place a build site
+POST /api/user/console                                        # run console expression
+```
 
-- Be imperative and surgical. Minimal code changes, maximum impact.
-- Never modify files outside `screeps/code/`, `STATE.md`, or `sandbox/` for gameplay purposes.
-- If a meaningful action is not possible (e.g., `SCREEPS_TOKEN` missing), state the blocker clearly,
-  update `STATE.md` accordingly, and stop.
+Base URL: `https://screeps.com`
+
+## Skills (Slash Commands)
+
+| Command    | Purpose                                          |
+|------------|--------------------------------------------------|
+| `/status`  | Full game overview: rooms, RCL, economy, threats |
+| `/deploy`  | Push `code/*.js` modules to the live game        |
+| `/console` | Read recent console output, surface errors       |
+| `/room`    | Deep dive on a specific room's objects           |
+| `/build`   | Place a construction site at given coordinates   |
+
+## Code
+
+- `code/` contains all bot modules deployed to Screeps.
+- `code/main.js` is the entry point — require all other modules from here.
+- After editing code, always run `/deploy` (or deploy manually) to push changes live.
+- Multiple files are encouraged: roles, utilities, managers, etc.
+
+## Repository
+
+- `STATE.md`: persistent game state, updated every session.
+- `sandbox/`: scratch area for data processing, temporary scripts, analysis.
+- `.claude/commands/`: skill definitions.
+- `.claude/hooks/`: session lifecycle scripts.
+
+## Style
+
+- Be surgical. Minimal changes, maximum impact.
+- Prefer game actions (API calls) over code changes for one-off needs.
+- When in doubt, probe before acting — read the room state first.
+- If `SCREEPS_TOKEN` is missing or a meaningful action is impossible, state the blocker,
+  update `STATE.md`, and stop.
