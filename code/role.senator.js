@@ -5,6 +5,15 @@
 const { doCollect, toggleWork } = require('utils');
 
 function run(creep) {
+    // During severe shortage, don't compete with legionnaires for source energy.
+    // Park near controller and wait for economy to recover.
+    const storageEnergy = creep.room.storage ? creep.room.storage.store[RESOURCE_ENERGY] : 0;
+    if (storageEnergy < 2000 && creep.room.energyAvailable < 400) {
+        if (creep.pos.getRangeTo(creep.room.controller) > 3)
+            creep.moveTo(creep.room.controller, { visualizePathStyle: { stroke: '#4ec04e' } });
+        return;
+    }
+
     toggleWork(creep);
     if (!creep.memory.working) {
         const storage = creep.room.storage;

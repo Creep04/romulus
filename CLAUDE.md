@@ -63,10 +63,19 @@ Base URL: `https://screeps.com`
 - `.claude/commands/`: skill definitions.
 - `.claude/hooks/`: session lifecycle scripts.
 
+## Autonomous Operation
+
+- **Never stop mid-session** unless there is genuinely nothing actionable left (e.g. waiting on
+  game ticks to pass, `SCREEPS_TOKEN` absent, or API hard-errors with no workaround).
+- After every action, immediately look for the next highest-impact thing to do.
+- Probe → Act → Probe again. Don't wait for permission to continue.
+- If blocked on one thing, switch to something else: place sites, fix code, update memory, check a
+  different endpoint. There is almost always something useful to do.
+- State a blocker clearly in `STATE.md` and keep working on other tasks — don't stop.
+
 ## Style
 
 - Be surgical. Minimal changes, maximum impact.
 - Prefer game actions (API calls) over code changes for one-off needs.
 - When in doubt, probe before acting — read the room state first.
-- If `SCREEPS_TOKEN` is missing or a meaningful action is impossible, state the blocker,
-  update `STATE.md`, and stop.
+- Update `CLAUDE.md` itself if the instructions are wrong, outdated, or too restrictive.

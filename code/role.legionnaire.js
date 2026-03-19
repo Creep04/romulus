@@ -8,6 +8,17 @@ function run(creep) {
     toggleWork(creep);
     if (!creep.memory.working) { doCollect(creep); return; }
 
+    // 0. Emergency tower fill — below 300 = defenseless
+    const towerEmergency = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
+        filter: s => s.structureType === STRUCTURE_TOWER &&
+                     s.store[RESOURCE_ENERGY] < 300
+    });
+    if (towerEmergency) {
+        if (creep.transfer(towerEmergency, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE)
+            creep.moveTo(towerEmergency, { visualizePathStyle: { stroke: '#ff0000' } });
+        return;
+    }
+
     // 1. Fill spawn / extensions (Critical for spawning)
     let fill = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
         filter: s => (s.structureType === STRUCTURE_SPAWN ||
