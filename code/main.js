@@ -124,7 +124,7 @@ module.exports.loop = function () {
                 // Senators are capped when economy is recovering to avoid wasting energy.
                 const canSpawnPartial = (role === 'legionnaire' || role === 'architect' || (role === 'senator' && counts[role] < 2));
 
-                if (canSpawnPartial && avail < cap && avail >= 250) {
+                if (canSpawnPartial && avail < cap && avail >= 550) {
                     // For senators during recovery, cap body to avoid spawning 10-WORK giants
                     const effectiveCap = (role === 'senator' && economyRecovering) ? Math.min(avail, 550) : avail;
                     spawnBody = utils.bodyFor(role, effectiveCap);
