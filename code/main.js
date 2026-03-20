@@ -124,7 +124,10 @@ module.exports.loop = function () {
                 // Senators are capped when economy is recovering to avoid wasting energy.
                 const canSpawnPartial = (role === 'legionnaire' || role === 'architect' || (role === 'senator' && counts[role] < 2));
 
-                if (canSpawnPartial && avail < cap && avail >= 550) {
+                // Legionnaires/architects can spawn partial at 350 (min viable [WWCMM])
+                // Senators need 550 minimum to avoid tiny [WCM] upgraders
+                const partialThreshold = (role === 'senator') ? 550 : 350;
+                if (canSpawnPartial && avail < cap && avail >= partialThreshold) {
                     // For senators during recovery, cap body to avoid spawning 10-WORK giants
                     const effectiveCap = (role === 'senator' && economyRecovering) ? Math.min(avail, 550) : avail;
                     spawnBody = utils.bodyFor(role, effectiveCap);
