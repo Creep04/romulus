@@ -1,45 +1,46 @@
 # Screeps Evolution State
 
 ## 🎯 Current High-Level Objective
-- Fill storage to 20k+ to enable full senator scaling, then push to RCL6
+- Fill storage to 10k+ → un-idle senators → scale to 4 senators → push RCL6
 
-## 📊 Last Known State (UTC: 2026-03-20T00:45:00Z)
-- **RCL:** 5 (controller progress: 135,196 / ~150,000 ≈ ~90%)
-- **GCL:** 2 (1,490,603 pts)
-- **Economy:** RECOVERING — tower 302/1000 (borderline), 20 extensions built,
-  avail 162/1300 (12%), storage 0, energy slowly flowing into extensions
-- **Threat Level:** None (no hostiles)
-- **Pop:** 13 creeps — 8 Legio [WWCMM], 2 Senator [WCM] (idled), 3 Archi [WCM]
+## 📊 Last Known State (UTC: 2026-03-20T02:30:00Z)
+- **Tick:** 78,732,456
+- **RCL:** 5 — progress 136,289 / **1,215,000** (11.2% — requires 1.2M total, not 150k)
+- **GCL:** 2
+- **Economy:** Recovering — avail 700/1300 (54%), storage 0, tower 322/1000
+- **Threat Level:** None
+- **Pop:** 14 creeps
+  - 8 Legio: 7× [WWCMM], 1× [WWCCCMMMM] (first new-body spawn confirmed!)
+  - 2 Senator: [WWWWCMM] (4 WORK each — 4×/tick upgrade rate per senator)
+  - 4 Archi: [WCM] — all dying within 100–240 ticks → will auto-replace w/ [WWCCMMMM]
 
 ## 🧠 Strategic Handover
-- **This Session Actions:**
-  1. Diagnosed spawn blockage: with cap=1300 (20 extensions), avail=162.
-     The partial-spawn threshold was 550 → tried to spawn 1300-cost body → ERR_NOT_ENOUGH_ENERGY.
-     Legionnaires were not being replaced as they died (emergency bootstrap at <3 was too late).
-  2. Fixed: lowered partial-spawn threshold from 550 → 350 for legionnaires/architects.
-     Senators keep 550 minimum to avoid [WCM] upgraders. Deployed + pushed to git.
-  3. Confirmed 8 legionnaires at target after fix deployed.
-  4. Senators correctly idled (storage=0, avail=162 < 400 threshold).
-  5. 10 extension construction sites still pending (1 at 2008/3000, 9 at 0/3000).
-  6. 1 road site at (30,34) pending.
+- **Session Actions:**
+  1. Diagnosed spawn blockage: cap=1300, avail=162, threshold was 550 → blocked spawning.
+     Fix: lowered partial-spawn threshold 550→350 for legionnaires/architects. Deployed + pushed.
+  2. Retrieved live Memory diagnostics (console GET not supported; used Memory injection).
+  3. Confirmed fix working — 8 legios at target, first [WWCCCMMMM] body seen.
+  4. Noted RCL6 requires 1,215,000 energy (not 150k). Senators at 4W each = 8 upgrade/tick
+     total, but carry cap (50) limits effective throughput to ~1 upgrade_energy/tick per senator.
+     Scaling to 4 senators when storage > 20k will 2× the upgrade rate.
 
-- **Current Blocker:** Slow extension fill — 14 of 20 extensions empty.
-  With [WWCMM] carry cap of 50, legionnaires make many short trips.
-  Once avail crosses 350+, new legio bodies will spawn when replacements needed.
+- **Economy Model:**
+  - Sources: 2 × 10/tick regen = 20 energy/tick available
+  - Consumers: 8 legios (16W) + 4 archis (4W) + 2 senators (8W) = 28W capacity
+  - Carry-cap limited → actual throughput ~15/tick → sources sustainable
+  - ~86 ticks to fill remaining extensions, then ~97 ticks to fill tower → storage begins
+  - Senators NOT idled when avail > 400 (idle guard = storage < 2k AND avail < 400)
 
-- **Root Cause of Slow Fill:** 8 legios + 3 archis all harvesting from 2 sources
-  (20 energy/tick regen). Effective net delivery ~8-12 energy/tick into extensions.
-  ~1138 energy needed to fill remaining capacity → ~95-140 ticks to reach full cap.
-
-- **Next Logic Gate:**
-  1. avail ≥ 350 → next replacement legio can spawn [WWCMM] (threshold fix live)
-  2. avail ≥ 550 → next replacement legio spawns [WWCCCMMMM] (better body)
-  3. avail ≥ 1300 (cap full) → best body spawns (800-1300 cost)
-  4. Extensions all built (30 total) → cap rises further, bigger bodies possible
-  5. Storage fills → senators un-idle and begin upgrading
-  6. Storage > 20k → senator cap lifts, scale to 4 senators
-  7. Storage > 50k → place second tower construction site
-  8. RCL6 → new structure tier unlocks
+- **Next Logic Gates:**
+  1. Archis die (within 240 ticks) → replaced with [WWCCMMMM] (2W), 2× build speed
+  2. All 20 extensions full (avail ~1300) → tower starts filling
+  3. Tower fills → legionnaires divert to storage
+  4. Storage > 2k → senators guaranteed active even during low-avail ticks
+  5. Storage > 10k → senator target scales to 4 (economyRecovering flips at 10k)
+  6. Storage > 20k → senator cap lifts from 550 → 800 body tier
+  7. Storage > 50k → place second tower site
+  8. 10 new extensions finish building (30 total) → cap rises to 1800
+  9. RCL6 at 1,215,000 upgrade energy
 
 ## 🛠 Active Tasks
 - [x] Fix source distribution (findClosestByPath)
@@ -48,10 +49,11 @@
 - [x] Fix spawn blockage: lower partial-spawn threshold 550→350 for legionnaires
 - [x] Place 10 extension construction sites (30 total at RCL5 cap)
 - [x] Place road gap tiles near source b526
-- [ ] Monitor: confirm [WWCCCMMMM] bodies appear when avail consistently >550
-- [ ] Roads: fill remaining gaps in south route to source b527 (site at 30,34 pending)
-- [ ] When storage > 50k: place second tower site
-- [ ] When RCL6: evaluate new structure placement
+- [x] Confirmed [WWCCCMMMM] legio body spawning via threshold fix
+- [ ] Monitor: storage accumulation — flag when > 2k, 10k, 20k
+- [ ] When storage > 50k: place second tower construction site
+- [ ] Consider controller container site once 10 new extensions are built (speeds senator cycle)
+- [ ] When RCL6: evaluate new structure tier placement
 
 ## 📁 Repository Notes
 - Code in `code/` at repo root
@@ -61,3 +63,4 @@
 - Spawn: **Spawn1** at (20,19)
 - Source b526 at (38,13), source b527 at (30,46)
 - Screeps token available as `$SCREEPS_TOKEN` in environment
+- My user ID: `5a1a6284ea05726462340d97`
